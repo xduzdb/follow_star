@@ -95,16 +95,56 @@ struct HomeCenterItemView: View {
     }
 }
 
+// 请阅读并且同意
+struct LoginAgreeView: View {
+    var itemHeight: Double
+    var onAgree: () -> Void // 添加回调闭包
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text("请阅读并同意以下条款")
+                .font(.system(size: 14)).fontWeight(.bold)
+                .foregroundColor(Color.color333333())
+                .padding(.top, 12)
+
+
+            Text("《用户协议》《隐私政策》")
+                .font(.system(size: 12)).fontWeight(.bold)
+                .foregroundColor(Color.color333333())
+                .padding(.vertical, 12)
+            
+            Divider()
+
+            Button(action: {
+                onAgree() // 调用回调
+            }) {
+                Text("同意并继续")
+                    .font(.system(size: 12)).fontWeight(.bold)
+                    .foregroundColor(Color.colorF05F49())
+                    .padding(.vertical, 12)
+            }
+        }
+        .frame(height: itemHeight)
+        .background(.white)
+        .cornerRadius(12)
+    }
+}
+
 // 添加订阅的弹框
 struct HomeBottomAddSubscribeView: View {
     // 弹出的高度
     var itemHeight: Double
+    var sub: () -> Void
+    
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             String.BundleImageName("home_add_subscribe_bottom")
                 .resizable()
                 .frame(width: 80, height: 80)
                 .padding(.top,24)
+                .onTapGesture {
+                    sub()
+                }
 
             Text("添加订阅")
                 .font(.system(size: 18)).fontWeight(.bold)
@@ -123,5 +163,8 @@ struct HomeBottomAddSubscribeView: View {
 
 #Preview {
 //    HomeBottomSheetItemView(title: "提醒设置", subTitle: "更换订阅", leftImageName: "home_cover")
-    HomeBottomAddSubscribeView(itemHeight: 210)
+    LoginAgreeView(itemHeight: 120) {
+        
+    }
+    .background(Color.red)
 }

@@ -12,30 +12,49 @@ struct HomeNaigtionBar: View {
     var headUrl = ""
 
     @Binding var contentHasScrolled: Bool
+    
     // 给外部的点击回调
     var dismissModal: () -> Void
 
     var body: some View {
         ZStack {
             Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            .black.opacity(0.0),
+                            .black.opacity(0.2),
+                            .black.opacity(0.4),
+                            .black.opacity(0.5),
+                            .black.opacity(0.6),
+                        ].reversed()),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .frame(maxWidth: .infinity)
                 .frame(height: STHelper.SafeArea.safeTop + 44)
-                .background(.ultraThinMaterial)
                 .ignoresSafeArea()
                 .frame(maxHeight: .infinity, alignment: .top)
-                .blur(radius: contentHasScrolled ? 10 : 0)
                 .opacity(contentHasScrolled ? 1 : 0)
 
             HStack(spacing: 0, content: {
                 if contentHasScrolled {
                     HStack(spacing: 0, content: {
-                        AsyncImageView(
-                            url: URL(string: headUrl),
+                        CachedImage(
+                            url: headUrl,
                             cornerRadius: 16
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16.0)
-                                .stroke(LinearGradient(gradient: Gradient(colors: [.red, .blue]), startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.0)
+                            Circle()
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [.red, .blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
                         )
                         .frame(width: 32, height: 32)
                         .padding(.zero)
@@ -62,9 +81,9 @@ struct HomeNaigtionBar: View {
                     //
                     String.BundleImageName("home_settings")
                         .resizable()
-                        .frame(width: 22, height: 22)
-                        .padding(.horizontal, 12) // This adds horizontal padding inside the image
+                        .padding(.horizontal, 12)
                         .padding(.vertical, 12)
+                        .frame(width: 40, height: 40)
                         .foregroundColor(.secondary)
                         .background(.ultraThinMaterial)
                         .backgroundStyle(cornerRadius: 24, opacity: 0.4)
@@ -79,5 +98,5 @@ struct HomeNaigtionBar: View {
 }
 
 #Preview {
-    HomeNaigtionBar(title: "张颂文", headUrl: "http://114.116.247.103:2500/static/attachment/star-avatar/weibo/0/d24df98ef4cd6f8fd3a6249d0103e75e.jpg", contentHasScrolled: .constant(false), dismissModal: {})
+    HomeNaigtionBar(title: "张颂文", headUrl: "http://114.116.247.103:2500/static/attachment/star-avatar/weibo/0/d24df98ef4cd6f8fd3a6249d0103e75e.jpg", contentHasScrolled: .constant(true), dismissModal: {})
 }

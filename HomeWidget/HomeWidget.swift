@@ -67,6 +67,7 @@ struct HomeWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             HomeWidgetEntryView(entry: entry)
+               
         }
         .configurationDisplayName("")
         .description("最新动态")
@@ -74,6 +75,7 @@ struct HomeWidget: Widget {
         .disableWidgetContentMargins()
     }
 }
+
 
 struct DesktopWidget_Previews: PreviewProvider {
     static var previews: some View {
@@ -88,6 +90,5 @@ struct DesktopWidget_Previews: PreviewProvider {
         let mediumEntry = SimpleEntry(date: date, model: OneDayModel.placeholder())
         HomeWidgetEntryView(entry: mediumEntry)
             .previewContext(WidgetPreviewContext(family: mediumFamily))
-
     }
 }

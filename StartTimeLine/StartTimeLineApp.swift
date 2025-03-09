@@ -45,22 +45,25 @@ struct StartTimeLineApp: App {
 struct SwiftUICallSwift: UIViewControllerRepresentable {
     @ObservedObject var model: Model
     func makeUIViewController(context: Context) -> some UIViewController {
-        let vc = LoginVC()
-        vc.loginCallback = { success in
+        let loginVC = LoginVC()
+        loginVC.loginCallback = { success in
             if success {
                 self.model.appLoginState = true
             }
         }
-        vc.pushForgetPageBlock = { _ in
+        loginVC.pushForgetPageBlock = { _ in
             // 跳转到忘记密码页面
             let pwd = ForgetPwdVC()
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first,
-               let rootViewController = window.rootViewController {
-                rootViewController.present(pwd, animated: true)
+               let rootViewController = window.rootViewController
+            {
+                rootViewController.navigationController?.pushViewController(pwd, animated: true)
             }
         }
-        return vc
+        // 创建 UINavigationController 并将 LoginVC 作为根视图控制器
+        let navigationController = UINavigationController(rootViewController: loginVC)
+        return navigationController
     }
 
     func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
@@ -73,9 +76,8 @@ struct LoginUIVC: View {
     var body: some View {
         VStack {
             SwiftUICallSwift(model: model)
-        }.navigationBarTitle("", displayMode: .inline)
-            .navigationBarBackButtonHidden(true)
+        }
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
     }
 }
-
-// 忘记密码的页面

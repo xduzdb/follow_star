@@ -123,6 +123,10 @@ extension UIColor {
     static func alertBackColor() -> UIColor {
         return ColorHex(hexStr: "#F7F6FB")
     }
+    
+    static func alertWhiteColor() -> UIColor {
+        return ColorHex(hexStr: "#FFFFFF")
+    }
 
     static func text333Color() -> UIColor {
         return ColorHex(hexStr: "333333")

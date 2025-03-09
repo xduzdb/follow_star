@@ -5,28 +5,35 @@
 //  Created by 张家和 on 2024/10/5.
 //
 
+import KakaJSON
+import SwiftyJSON
 import UIKit
-import ObjectMapper
 
-class EventListData: Mappable {
-    
+struct EventListDetailsData: Convertible, Hashable {
+    var id: String?
+    var date: String?
+    var activityId: Int?
+    var classifyId: Int?
+    var timelineType: String?
     var text: String?
-    var likeCount: Int?
+    var createdAt: String?
+    var updatedAt: String?
+    var comment: String?
     var isLike: Bool?
-
-    func mapping(map: Map) {
-        text <- map["text"]
-        likeCount <- map["likes_count"]
-        isLike <- map["is_like"]
-    }
+    var likesCount: Int?
     
-    required init?(map: Map) {
-        // 检查JSON是否有name字段
-        if map.JSON["text"] == nil {
-            return nil
-        }
+    func kj_modelKey(from property: Property) -> ModelPropertyKey {
+        return property.name.kj.underlineCased()
     }
+}
 
-    
+struct EventListData: Convertible, Hashable, Identifiable {
+    let id = UUID()
+    var lunarDate: String?
+    var solarDate: String?
+    var list: [EventListDetailsData]?
 
+    func kj_modelKey(from property: Property) -> ModelPropertyKey {
+        return property.name.kj.underlineCased()
+    }
 }

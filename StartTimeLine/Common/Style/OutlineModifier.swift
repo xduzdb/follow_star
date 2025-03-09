@@ -33,10 +33,7 @@ struct OutlineVerticalModifier: ViewModifier {
         content.overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(
-                    .linearGradient(
-                        colors: [.black.opacity(0.2), .white.opacity(0.6)],
-                        startPoint: .top,
-                        endPoint: .bottom)
+
                 )
                 .blendMode(.overlay)
         )
@@ -67,15 +64,14 @@ struct OutlineOverlay: ViewModifier {
     func body(content: Content) -> some View {
         content.overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(
-                    .linearGradient(
-                        colors: [
-                            .white.opacity(colorScheme == .dark ? 0.6 : 0.3),
-                            .black.opacity(colorScheme == .dark ? 0.3 : 0.1)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom)
+                .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [.black.opacity(0.2), .white.opacity(0.6)]),
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
+                .cornerRadius(cornerRadius) // 根据需要设置圆角
+            )
                 .blendMode(.overlay)
         )
     }
@@ -113,8 +109,6 @@ struct BackgroundStyle: ViewModifier {
         content
             .backgroundColor(opacity: opacity)
             .cornerRadius(cornerRadius)
-            .shadow(color: Color("Shadow").opacity(isLiteMode ? 0 : 0.3), radius: 20, x: 0, y: 10)
-            .modifier(OutlineOverlay(cornerRadius: cornerRadius))
     }
 }
 

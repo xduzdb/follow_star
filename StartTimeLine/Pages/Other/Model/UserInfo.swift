@@ -8,7 +8,7 @@
 import Foundation
 import ObjectMapper
 
-class UserInfo: Mappable {
+class UserInfo: Mappable, ObservableObject {
     var username: String?
     var nickname: String?
     var avatar: String?
@@ -30,7 +30,7 @@ class UserInfo: Mappable {
         updatedUsernameAt <- map["updated_username_at"]
         createdAt <- map["created_at"]
     }
-    
+
     required init?(map: Map) {
         // 检查JSON是否有name字段
         if map.JSON["username"] == nil {

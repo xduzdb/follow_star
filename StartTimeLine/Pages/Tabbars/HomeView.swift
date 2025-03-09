@@ -18,35 +18,43 @@ struct HomeView: View {
     @State var startStatisticsModel: StartStatisticsModel?
     // 动态的列表
     @State var startDynamicList: [StartDynamicModel]?
-    @State var contentHasScrolled = true
+    @State var contentHasScrolled = false
     @EnvironmentObject var model: Model
 
-    @State private var lineOffset: CGFloat = -15
+    @State private var lineOffset: CGFloat = 35
     @State private var lineWidth: CGFloat = 20
-    @State private var selectedIndex: Int = 0
+    @State private var selectedIndex: Int = 1
 
-    @AppStorage(StartDataKey, store: UserDefaults(suiteName: AppGroupIdentifier))
-    private var startStorage: Data?
-
-    // 是否展示底部弹框设置相关
-    @State private var showBottomSheet = false
-    // 是否跳转到提醒设置页面
-    @State private var navigateToNextRemindView = false
-    // 更换订阅页面
-    @State private var navigateToNextSubView = false
-    // 更换封面
-    @State private var navigateToChangeCoverView = false
-
+    @State private var text = "微博"
+    @State private var categories: [String] = []
+    @State private var props: [Double] = []
     // 判断当前是否是开启通知
     @State private var isNotificationEnabled = false
-    
+    // 是不是第一次请求过
+    @State private var requestStartId = ""
+
+    // 是否展示底部弹框设置相关
+    @Binding var showBottomSheet: Bool
+    // 是否跳转到提醒设置页面
+    @Binding var navigateToNextRemindView: Bool
+    // 更换订阅页面
+    @Binding var navigateToNextSubView: Bool
+    // 更换封面
+    @Binding var navigateToChangeCoverView: Bool
+
     var body: some View {
         ZStack {
             Color("Background")
                 .ignoresSafeArea()
 
             // 提醒设置
-            NavigationLink(destination: RemindSettingView(), isActive: $navigateToNextRemindView) {
+            NavigationLink(destination: Group {
+                if !isNotificationEnabled {
+                    RemindSettingView()
+                } else {
+                    UserPushNotificationsView()
+                }
+            }, isActive: $navigateToNextRemindView) {
                 EmptyView()
             }
 
@@ -54,45 +62,45 @@ struct HomeView: View {
                 EmptyView()
             }
 
-            NavigationLink(destination: ChangeCoverView(), isActive: $navigateToChangeCoverView) {
+            NavigationLink(destination: ChangeCoverView(startDetailModel: $startDetailModel), isActive: $navigateToChangeCoverView) {
                 EmptyView()
             }
 
             // 可以滑动的视图
             ScrollView {
-                scrollDetection
+                ZStack(alignment: .top) {
+                    scrollDetection
+                        .frame(height: 0)
 
-                // 顶部的详情
-                topStartHomeView
-                    .frame(maxHeight: 420)
-                    .offset(y: -20)
-                    .padding(.vertical, 0)
+                    VStack(spacing: 12) {
+                        topStartHomeView
 
-                socialDynamicView
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    .padding(.vertical, 0)
-                    .padding(.horizontal)
+                        socialDynamicView
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
 
-                // 底部 发布统计
-                HomeStatisticsView(data: [1]) {
-                    HomeStartStatisticsView(statisticsModel: startStatisticsModel)
+                        // 底部 发布统计
+                        HomeStatisticsView(data: 1.0) {
+                            HomeStartStatisticsView(statisticsModel: startStatisticsModel)
+                        }
+                        .padding(.horizontal)
+
+                        // 发布趋势
+                        HomeTrendView(data: (startStatisticsModel?.history?.dates ?? []).count > 0 ? 1.0 : 0.0) {
+                            STLineChartView(title: $text, categories: $categories, prop: $props)
+                                .frame(height: 300)
+                                .padding(.top, 12)
+                        }
+                        .padding(.horizontal)
+                        .foregroundColor(.white)
+
+                        Spacer()
+                            .frame(height: 100)
+                    }
                 }
-                .padding(.horizontal)
-                .foregroundColor(.white)
-
-                // 发布趋势
-                HomeTrendView {
-                    Text("")
-                }
-                .padding(.horizontal)
-                .foregroundColor(.white)
-
-                // 底部增加100 高度
-                Spacer()
-                    .frame(height: 200)
             }
+            .ignoresSafeArea(.all, edges: .top)
             .coordinateSpace(name: "scroll")
         }
         .background(Color.mainBackColor())
@@ -100,72 +108,75 @@ struct HomeView: View {
         .overlay(HomeNaigtionBar(title: startDetailModel?.name ?? "", headUrl: startDetailModel?.avatar ?? "", contentHasScrolled: $contentHasScrolled, dismissModal: {
             showBottomSheet = true
         }))
-        .sheet(isPresented: $showBottomSheet) {
-            StarAlertView(pushTypeAction: { index in
-                showBottomSheet = false
-                if index == 0 {
-                    navigateToNextRemindView = true
-                } else if index == 1 {
-                    navigateToNextSubView = true
-                } else {
-                    navigateToChangeCoverView = true
-                }
-            })
-            .modifier(AlertModifier())
-        }
         .onAppear {
-            getStartInfo()
-            checkNotificationStatus()
-            getCurrentDynamic()
+            if requestStartId != model.startSid || requestStartId.isEmpty {
+                checkNotificationStatus()
+                getStartInfo()
+                getAllHelpUrl()
+            }
         }
     }
 
     // 用户的背景图 以及 头像还有名字
     var topStartHomeView: some View {
-        ZStack {
-            WebImage(url: URL(string: startDetailModel?.cover?.url ?? startDetailModel?.avatar ?? "")) { image in
-                // 图片等比例缩放模式
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: SCREEN_WIDTH, height: topBackHeight, alignment: .center)
-                    .clipped()
+        ZStack(content: {
+            GeometryReader { geometry in
+                let minY = geometry.frame(in: .global).minY
+                ZStack {
+                    CachedImage(url: model.coverUlr ?? "", cornerRadius: 0)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width,
+                               height: geometry.size.height + (minY > 0 ? minY : 0))
+                        .clipped()
+                        .offset(y: minY > 0 ? -minY : 0)
+                }
+            }
 
-            } placeholder: {
-                Rectangle()
-                    .frame(width: SCREEN_WIDTH, height: topBackHeight, alignment: .center)
-                    .foregroundColor(.gray)
+            // 添加一个从上到下的渐变
+            VStack {
+                Spacer()
+                LinearGradient(gradient: Gradient(colors: [
+                    Color.clear,
+                    Color.mainBackColor().opacity(0.1),
+                    Color.mainBackColor().opacity(0.2),
+                    Color.mainBackColor().opacity(0.3),
+                    Color.mainBackColor().opacity(0.5),
+                    Color.mainBackColor().opacity(0.8),
+                    Color.mainBackColor().opacity(0.9),
+                    Color.mainBackColor().opacity(1),
+                ]),
+                startPoint: .top,
+                endPoint: .bottom)
+                    .frame(width: SCREEN_WIDTH, height: 180)
             }
 
             HStack(spacing: 0) {
                 VStack(alignment: .leading) {
                     Spacer()
-                    WebImage(url: URL(string: startDetailModel?.avatar ?? "")) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .clipShape(Circle())
-                            .frame(width: 56, height: 56, alignment: .center)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 34.0)
-                                    .stroke(LinearGradient(gradient: Gradient(colors: [.red, .blue]), startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2.0)
-                            )
-                    } placeholder: {
-                        Rectangle()
-                            .scaledToFill()
-                            .clipShape(Circle())
-                            .frame(width: 56, height: 56, alignment: .center)
-                            .foregroundColor(.gray)
-                    }
+                    CachedImage(url: startDetailModel?.avatar ?? "", cornerRadius: 56 / 2.0)
+                        .frame(width: 56.0, height: 56.0)
+                        .overlay(
+                            Circle()
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [.red, .blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
 
                     Text(startDetailModel?.name ?? "")
                         .font(.system(size: 28)).bold()
                 }
                 .padding(.leading, 28)
-                .padding(.zero)
+                .padding(.bottom, 0)
+
                 Spacer()
             }
-        }
+        })
+        .frame(height: topBackHeight)
     }
 
     // 社交动态的view
@@ -181,23 +192,28 @@ struct HomeView: View {
                         Spacer()
 
                         // 是24小时还是 1分钟
-                        VStack {
-                            HStack {
+                        VStack(spacing: 0) {
+                            HStack(spacing: 6) {
                                 Image(systemName: "flame.fill") // 使用系统图标
-                                    .foregroundColor(.red)
-                                    .font(.system(size: 16))
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 14))
                                     .padding(.zero)
 
-                                Text("一分钟")
-                                    .foregroundColor(selectedIndex == 0 ? .color333333() : .black.opacity(0.4))
-                                    .font(.system(size: selectedIndex == 0 ? 16 : 14))
-                                    .bold()
-                                    .onTapGesture {
-                                        withAnimation {
-                                            selectedIndex = 0
-                                            lineOffset = -15
-                                        }
-                                    }
+                                Button {
+                                    YDToast.showCenterWithText(text: "功能开发中")
+                                } label: {
+                                    Text("1分钟")
+                                        .foregroundColor(selectedIndex == 0 ? .color333333() : .black.opacity(0.4))
+                                        .font(.system(size: selectedIndex == 0 ? 16 : 14))
+                                        .bold()
+                                }
+
+                                // 设置宽高的不同
+                                Rectangle()
+                                    .frame(width: 1.4, height: 12)
+                                    .cornerRadius(0.7)
+                                    .foregroundColor(Color.black.opacity(0.2))
+                                    .padding(.horizontal, 0)
 
                                 Text("24小时")
                                     .font(.system(size: selectedIndex == 1 ? 16 : 14))
@@ -218,12 +234,12 @@ struct HomeView: View {
                                 .frame(width: lineWidth, height: 4)
                                 .offset(x: lineOffset)
                                 .animation(.easeInOut, value: lineOffset)
-                                .padding(.top, -10)
+                                .padding(.top, -4)
                         }
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                     .padding(.leading, 12)
-                    .padding(.trailing, 20)
+                    .padding(.trailing, 12)
 
                     // 如果是空的 显示空视图
                     if (startDynamicList ?? []).isEmpty {
@@ -248,14 +264,12 @@ struct HomeView: View {
                     } else {
                         // LazyVGrid 展示列表
                         ForEach(startDynamicList ?? [], id: \.self) { item in
-                            HomeDynamicView(dynamic: item) // 使用 HomeDynamicView 显示每个动态
+                            HomeDynamicView(dynamic: item)
                         }
                     }
                 })
             }
-            // 是否开启通知
-            if !isNotificationEnabled
-            {
+            if !self.isNotificationEnabled {
                 ZStack {
                     RoundedRectangle(cornerRadius: 0)
                         .fill(
@@ -290,8 +304,6 @@ struct HomeView: View {
                 }
             }
         }
-        .frame(width: .infinity)
-        .frame(minHeight: 270)
         .padding(.vertical, 0)
     }
 
@@ -300,21 +312,15 @@ struct HomeView: View {
             let offset = proxy.frame(in: .named("scroll")).minY
             Color.clear.preference(key: ScrollPreferenceKey.self, value: offset)
         }
+        .padding(.all, 0)
+        .frame(height: 0)
         .onPreferenceChange(ScrollPreferenceKey.self) { value in
             withAnimation(.easeInOut) {
-                if value < 0 {
+                if value < -topBackHeight {
                     contentHasScrolled = true
                 } else {
                     contentHasScrolled = false
                 }
-            }
-        }
-    }
-    
-    func checkNotificationStatus() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            DispatchQueue.main.async {
-                self.isNotificationEnabled = settings.authorizationStatus == .authorized
             }
         }
     }
@@ -355,8 +361,12 @@ struct HomeView: View {
     // 展示添加订阅的
     func showAddSubscribeAlert() {
         let customPopupView = FWCustomSheetView(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH, height: 260))
-        let centerItemView = HomeBottomAddSubscribeView(itemHeight: 280)
-            .edgesIgnoringSafeArea(.all)
+        let centerItemView = HomeBottomAddSubscribeView(itemHeight: 280, sub: {
+            customPopupView.hide()
+            navigateToNextSubView = true
+        })
+        .edgesIgnoringSafeArea(.all)
+
         let hostingController = UIHostingController(rootView: centerItemView)
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         customPopupView.addSubview(hostingController.view)
@@ -376,8 +386,8 @@ struct HomeView: View {
         vProperty.popupCustomAlignment = .bottomCenter
         vProperty.backgroundColor = UIColor.white
         vProperty.popupAnimationType = .position
+        vProperty.touchWildToHide = "0"
         vProperty.maskViewColor = UIColor(white: 0, alpha: 0.5)
-        vProperty.touchWildToHide = "1"
         vProperty.popupViewEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         vProperty.animationDuration = 0.25
         customPopupView.vProperty = vProperty
@@ -394,26 +404,30 @@ struct HomeView: View {
                     getHomdeDefaultStart()
                     showAddSubscribeAlert()
                 } else {
-                    // 拿到requestObj.data.sid 进行网络请求
                     let params = ["sid": requestObj.data?["sid"] ?? ["sid": "1"]] as [String: Any]
                     if let sid = requestObj.data?["sid"] as? String {
-                        model.startSid = sid
-                        getHomeWdiget()
-                        getCurrentDynamic()
-                        getStatrDynamicStatistic()
-
-                    } else {
-                        model.startSid = "" // 或者您可以设置为其他默认值
-                    }
-                    NetWorkManager.ydNetWorkRequest(.getStartDetails(params), isShowErrMsg: false, completion: { requestObj in
-                        if requestObj.status == .success {
-                            // 解析当前的明星信息 StartUserModel 使用KKJSON接
-                            self.startDetailModel = requestObj.data?.kj.model(StartUserModel.self)
+                        if sid == requestStartId {
+                            
                         } else {
+                            model.startSid = sid
+                            getHomeWdiget()
+                            getCurrentDynamic(sid: sid)
+                            getStatrDynamicStatistic(sid: sid)
+                            NetWorkManager.ydNetWorkRequest(.getStartDetails(params), isShowErrMsg: false, completion: { requestObj in
+                                if requestObj.status == .success {
+                                    // 解析当前的明星信息 StartUserModel 使用KKJSON接
+                                    self.startDetailModel = requestObj.data?.kj.model(StartUserModel.self)
+                                    Model().savaCurrentStartInfo(data: requestObj.data ?? [:])
+                                    model.coverUlr = self.startDetailModel?.coverUrl
+                                    model.currentStartDetailModel = self.startDetailModel
+                                    requestStartId = model.startSid
+                                }
+                            })
                         }
-                    })
+                    } else {
+                        model.startSid = ""
+                    }
                 }
-
             } else {
                 // 如果没有订阅明星 则获取首页默认的明星
                 if requestObj.code == 404 {
@@ -425,19 +439,14 @@ struct HomeView: View {
 
     // 获取挂件的信息
     func getHomeWdiget() {
-        if model.startSid.isEmpty {
-            return
-        }
-
         NetWorkManager.ydNetWorkRequest(.notice, isShowErrMsg: false, completion: { requestObj in
             if requestObj.status == .success {
                 // 刷新首页的Widget
                 let model = requestObj.data?.kj.model(StartWidgetInfoModel.self)
-                var oneDayModel = OneDayModel(text: model?.text ?? "", imageUrl: model?.star?.avatar ?? "", type: model?.type ?? "")
+                var oneDayModel = OneDayModel(text: model?.text ?? "", imageUrl: model?.star?.widgetAvatar ?? "", type: model?.type ?? "")
                 oneDayModel.refreshOptions = .all
                 saveCacheModel(mode: oneDayModel)
-            } else {
-            }
+            } else {}
         })
     }
 
@@ -450,33 +459,56 @@ struct HomeView: View {
         })
     }
 
-    // 获取当前的社交动态
-    func getCurrentDynamic() {
-        if model.startSid.isEmpty {
-            return
-        }
-
-        let params = ["sid": model.startSid] as [String: Any]
+    // 获取当前的社交动态 6746e9d100026267c34f 杨紫
+    func getCurrentDynamic(sid: String) {
+        let params = ["sid": sid] as [String: Any]
         NetWorkManager.ydNetWorkRequest(.startPost(params), completion: { requestObj in
             if requestObj.status == .success {
-                // 转换为startDynamicList
-                let json: [[String: Any]] = requestObj.data?["list"] as! [[String: Any]]
-                self.startDynamicList = json.kj.modelArray(StartDynamicModel.self)
+                if requestObj.data == nil {
+                    self.startDynamicList = []
+                } else {
+                    if let data = requestObj.data,
+                       let list = data["list"] as? [[String: Any]]
+                    {
+                        self.startDynamicList = list.kj.modelArray(StartDynamicModel.self)
+                    } else {
+                        self.startDynamicList = [] // Optionally set to an empty array or handle as needed
+                    }
+                }
+            } else {
+                self.startDynamicList = []
             }
         })
     }
 
     // 明星动态统计
-    func getStatrDynamicStatistic() {
-        if model.startSid.isEmpty {
-            return
-        }
-        let params = ["sid": model.startSid] as [String: Any]
+    func getStatrDynamicStatistic(sid: String) {
+        let params = ["sid": sid] as [String: Any]
         NetWorkManager.ydNetWorkRequest(.startDynamicStatistics(params), completion: { requestObj in
             if requestObj.status == .success {
                 self.startStatisticsModel = requestObj.data?.kj.model(StartStatisticsModel.self)
+                self.text = "微博"
+                self.categories = self.startStatisticsModel?.history?.dates ?? []
+                self.props = self.startStatisticsModel?.history?.items?.first?.data ?? []
             }
         })
+    }
+
+    func checkNotificationStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                self.isNotificationEnabled = settings.authorizationStatus == .authorized
+            }
+        }
+    }
+
+    // 获取各种帮助与反馈的URL
+    func getAllHelpUrl() {
+        NetWorkManager.ydNetWorkRequest(.allHelpUrl) { requestObj in
+            if requestObj.status == .success {
+                model.feedBackModel = requestObj.data?.kj.model(FeebBackModel.self)
+            }
+        }
     }
 }
 
@@ -489,7 +521,7 @@ struct StarAlertView: View {
                 .frame(width: 50, height: 6)
                 .cornerRadius(3)
                 .foregroundColor(Color.hex("D9D9D9"))
-                .padding(EdgeInsets(top: 6, leading: 0, bottom: 24, trailing: 0))
+                .padding(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
 
             VStack(spacing: 16) {
                 HomeBottomSheetItemView(title: "提醒设置", subTitle: "提醒设置", leftImageName: "home_notication")
@@ -504,23 +536,27 @@ struct StarAlertView: View {
                     .onTapGesture {
                         pushTypeAction(2)
                     }
-                Spacer()
             }
-            Spacer()
         }
+        .padding(.bottom, 40)
         .background(Color.mainBackColor())
-        .padding(.zero)
     }
 }
 
 struct AlertModifier: ViewModifier {
+    let height: CGFloat
+
+    init(height: CGFloat = 360) {
+        self.height = height
+    }
+
     func body(content: Content) -> some View {
         if #available(iOS 16, *) {
             content
-                .presentationDetents([.height(360)]) // iOS 16 and later
+                .presentationDetents([.height(height)]) // iOS 16 and later
         } else {
             content
-                .frame(height: 360) // Fallback for iOS 15
+                .frame(height: height) // Fallback for iOS 15
         }
     }
 }
@@ -543,12 +579,45 @@ extension HomeView {
 }
 
 #Preview {
-    HomeView(startDetailModel: nil)
+//    HomeView(startDetailModel: nil)
 }
 
 struct ScrollPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
+    }
+}
+
+struct PopupBottomSecond: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image("chest")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 156, maxHeight: 156)
+
+            Text("Personal offer")
+                .foregroundColor(.black)
+                .font(.system(size: 24))
+                .padding(.top, 4)
+
+            Text("Say hello to flexible funding – you're pre-screened for an exclusive personal loan offer through TD Bank. Enter your Personal Offer Code to get started.")
+                .foregroundColor(.black)
+                .font(.system(size: 16))
+                .opacity(0.6)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 12)
+
+            Text("Read More")
+                .font(.system(size: 18, weight: .bold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .cornerRadius(12)
+                .foregroundColor(.white)
+                .padding(.horizontal, 64)
+        }
+        .padding(EdgeInsets(top: 37, leading: 24, bottom: 40, trailing: 24))
+        .background(Color.white.cornerRadius(20))
     }
 }

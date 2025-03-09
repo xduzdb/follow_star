@@ -46,6 +46,7 @@ struct StartUserModel: Convertible, Hashable {
     var birthday: String?
     var subscription: String?
     var lastUpdateAt: String?
+    var coverUrl: String?
     var isSubscribed: Bool?
     var subscribe: Int?
     var cover: StartCover?

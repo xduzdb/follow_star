@@ -29,12 +29,11 @@ struct OneDaySmallView: View {
 
                     Spacer()
 
-                    Text(model.type)
+                    Text("星事记")
                         .font(.custom("PingFangSC", size: 12))
                         .foregroundColor(Color("TopTextColor"))
                         .padding(.horizontal, 4)
                         .padding(.vertical, 1)
-
                         .background(LinearGradient(gradient: Gradient(colors: [Color("TopStartColor"), Color("TopEndColor")]), startPoint: .leading, endPoint: .trailing))
                         .cornerRadius(10)
                 }
@@ -67,6 +66,8 @@ struct OneDaySmallView: View {
                 Color.black.opacity(0.01)
             )
         }
+        .widgetBackground(Color.black)
+        .disableWidgetContentMargins()
     }
 }
 
@@ -88,51 +89,44 @@ struct OneDayMediumView: View {
                     Color.black.opacity(0.15)
                 )
 
-            // 明星的图片
-            Image(uiImage: model.image)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 110, height: 150)
-                .clipped()
-                .position(x: 67.0, y: 86.0)
-                .cornerRadius(8)
-                .foregroundColor(.red)
-
             //  使用网络图片
-
-            HStack {
-                Spacer()
-                    .frame(width: 110)
+            HStack(alignment: .top,spacing: 0) {
+                Image(uiImage: model.image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 140, height: WidgetFamily.systemMedium.jp.widgetSize.height)
+                    .clipped()
+                    .foregroundColor(Color.red)
+                    .padding(.all, 0)
 
                 VStack(alignment: .leading) {
-                    HStack(content: {
+                    HStack(alignment: .top,content: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(dateInfo.year).\(dateInfo.month).\(dateInfo.day) \(dateInfo.weekday) ")
+                                .font(.custom("PingFangSC", size: 12))
+                                .foregroundColor(Color("TimeBack"))
+                                .padding(.bottom, 12)
+
+                            Text("此时此刻")
+                                .font(.custom("PingFangSC", size: 12))
+                                .foregroundColor(Color("TimeBack"))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .border(Color("BorderColor"), width: 0.5)
+                                .background(LinearGradient(gradient: Gradient(colors: [Color.startWidgetLinear().opacity(0.05), Color.endWidgetLinear().opacity(0.05)]), startPoint: .leading, endPoint: .trailing))
+                                .cornerRadius(2)
+                        }
+                        
                         Spacer()
-                        Text(model.type)
+                        Text("星事记")
                             .font(.custom("PingFangSC", size: 12))
                             .foregroundColor(Color("TopTextColor"))
                             .padding(.horizontal, 4)
                             .padding(.vertical, 1)
-
                             .background(LinearGradient(gradient: Gradient(colors: [Color("TopStartColor"), Color("TopEndColor")]), startPoint: .leading, endPoint: .trailing))
                             .cornerRadius(10)
                     })
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(dateInfo.year).\(dateInfo.month).\(dateInfo.day) \(dateInfo.weekday) ")
-                            .font(.custom("PingFangSC", size: 12))
-                            .foregroundColor(Color("TimeBack"))
-
-                        Text("此时此刻")
-                            .font(.custom("PingFangSC", size: 12))
-                            .foregroundColor(Color("TimeBack"))
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .border(Color("BorderColor"), width: 0.5)
-                            .background(LinearGradient(gradient: Gradient(colors: [Color.startWidgetLinear().opacity(0.05), Color.endWidgetLinear().opacity(0.05)]), startPoint: .leading, endPoint: .trailing))
-                            .cornerRadius(2)
-                    }
-
-                    Spacer()
+                    .padding(.bottom, 6)
 
                     Text(model.text)
                         .lineLimit(2)
@@ -142,17 +136,17 @@ struct OneDayMediumView: View {
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-//                .baseShadow()
-                .padding(.horizontal, 12)
-                .padding(.leading, 12)
-                .padding(.top, 15)
-                .padding(.bottom, 20)
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                .padding(.all, 15)
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity,alignment: .top)
                 .background(
                     Color.black.opacity(0.01)
                 )
+                
             }
+            .padding(.horizontal, -4)
         })
+        .widgetBackground(Color.clear)
+        .disableWidgetContentMargins()
     }
 }
 
@@ -216,21 +210,8 @@ struct OneDayView_Previews: PreviewProvider {
     static let largeSize = WidgetFamily.systemLarge.jp.widgetSize
 
     static var previews: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                Group {
-                    OneDaySmallView()
-                        .frame(width: smallSize.width, height: smallSize.height)
-                    OneDayMediumView()
-                        .frame(width: mediumSize.width, height: mediumSize.height)
-//                    OneDayLargeView()
-//                        .frame(width: largeSize.width, height: largeSize.height)
-                }
-                .mask(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .baseShadow()
-                .padding(8)
-            }
+        OneDayMediumView()
+            .frame(width: mediumSize.width, height: mediumSize.height)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
     }
 }

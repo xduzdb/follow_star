@@ -366,6 +366,32 @@ extension String {
     }
 }
 
+extension String {
+    func formatDateString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"
+        dateFormatter.locale = Locale(identifier: "zh_CN") // 设置为中文环境
+        
+        if let date = dateFormatter.date(from: self) {
+            dateFormatter.dateFormat = "yyyy年MM月dd日"
+            return dateFormatter.string(from: date)
+        }
+        return self
+    }
+    
+    func formatTimeLineDateString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"
+        dateFormatter.locale = Locale(identifier: "zh_CN") // 设置为中文环境
+        
+        if let date = dateFormatter.date(from: self) {
+            dateFormatter.dateFormat = "MM月dd日"
+            return dateFormatter.string(from: date)
+        }
+        return self
+    }
+}
+
 /**
  样例
  func getNormalStrH(str: String, strFont: CGFloat, w: CGFloat) -> CGFloat {

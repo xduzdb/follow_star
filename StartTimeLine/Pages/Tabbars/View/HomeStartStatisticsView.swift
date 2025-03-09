@@ -74,9 +74,6 @@ struct HomeStartStatisticsView: View {
                     ForEach(hours.prefix(5)) { stat in
                         if stat.scale ?? 0.0 > 0 {
                             HStack(content: {
-                                String.BundleImageName("home_moon_icon")
-                                    .frame(width: 22, height: 22)
-
                                 VStack(alignment: .leading) {
                                     HStack(spacing: 0) {
                                         Text("\(stat.startTime ?? "")~\(stat.endTime ?? "")")
@@ -112,7 +109,6 @@ struct HomeStartStatisticsView: View {
                     }
                 }
             }
-            Spacer()
         }
         .background(Color.white)
         .cornerRadius(12)

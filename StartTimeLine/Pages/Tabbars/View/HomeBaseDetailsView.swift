@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct HomeBaseDetailsView<Content: View>: View {
-    var data: [Double]?
+    var data: Double?
     var title: String
+
     var content: () -> Content // 传入的视图
-    var isDataEmpty: Bool { data?.isEmpty ?? true }
+    var isDataEmpty: Bool { data == 0 }
 
     var body: some View {
         VStack {
@@ -48,9 +49,9 @@ struct HomeBaseDetailsView<Content: View>: View {
             }
         }
         .padding() // 添加内边距
+        .padding(.bottom, 0)
         .background(Color.white) // 设置背景为白色
         .cornerRadius(12) // 设置圆角
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 

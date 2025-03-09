@@ -12,11 +12,12 @@ import SwiftUI
 struct HistoryView: View {
     var body: some View {
         VStack {
-            HistoryTVWrapper()
+            HistoryDetailsView()
                 .background(Color.clear)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .ignoresSafeArea(.all, edges: .top)
         .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea(.keyboard)
     }
 }
 

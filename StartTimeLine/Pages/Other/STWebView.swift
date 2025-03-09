@@ -28,5 +28,27 @@ struct STWebView: View {
     var body: some View {
         STCustomWebView(url: url)
             .navigationBarHidden(true)
+            .ignoresSafeArea()
+    }
+}
+
+struct WebViewNavigationLink: View {
+    let urlString: String?
+    @Binding var isActive: Bool
+
+    var body: some View {
+        Group {
+            if let urlString = urlString,
+               let url = URL(string: urlString)
+            {
+                NavigationLink(
+                    destination: STWebView(url: url)
+                        .navigationBarBackButtonHidden(true),
+                    isActive: $isActive
+                ) {
+                    EmptyView()
+                }
+            }
+        }
     }
 }

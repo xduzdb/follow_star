@@ -8,7 +8,7 @@
 import UIKit
 
 class CustomWebViewController: STBaseViewController {
-    
+    private var urlTitle: String?
     private var url: URL
     
     // 通过构造器接收 URL
@@ -17,6 +17,7 @@ class CustomWebViewController: STBaseViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -29,6 +30,10 @@ class CustomWebViewController: STBaseViewController {
         
         // 初始化并添加 CustomWebView
         let customWebView = CustomWebView(url: url)
+        customWebView.webViewTitleBlock = { title in
+            self.setNavigationTitle(title)
+        }
+        
         customWebView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(customWebView)
         

@@ -14,7 +14,6 @@ struct TextFieldModifier: ViewModifier {
             .padding(15)
             .background(Color.hex("F7F6FB"))
             .cornerRadius(20)
-            .modifier(OutlineOverlay(cornerRadius: 20))
     }
 }
 

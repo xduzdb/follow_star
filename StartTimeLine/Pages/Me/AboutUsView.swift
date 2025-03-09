@@ -18,7 +18,7 @@ struct AboutUsView: View {
         NavTopView {
             VStack(content: {
                 VStack(spacing: 0) {
-                    String.BundleImageName("AppIcon")
+                    String.BundleImageName("app_icon")
                         .resizable()
                         .frame(width: 80.0, height: 80.0, alignment: .center)
                         .cornerRadius(12.0)
@@ -64,16 +64,35 @@ struct AboutUsView: View {
                 .padding(.bottom, 0)
 
                 /// 用户协议和 隐私政策
-                VStack(spacing: 0) {
-                    Link(destination: URL(string: aboutUsData?.protocol_url ?? "") ?? URL(string: "https://www.baidu.com")!) {
-                        AccountSettingItem(title: "隐私政策", leftImageName: "setting_lock", notShowBottomLine: false) {
-                            Spacer()
-                        }
+                NavigationLink(destination: STWebView(url: URL(string: aboutUsData?.policyUrl ?? privateUrl())!).navigationBarBackButtonHidden(true)) { // Hide the back button) {
+                    AccountSettingItem(title: "隐私政策", leftImageName: "setting_lock", notShowBottomLine: false) {
+                        Spacer()
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .padding(.horizontal)
                 .padding(.top, 0)
+                
+                
+                NavigationLink(destination: STWebView(url: URL(string: aboutUsData?.protocolUrl ?? userAgreeUrl())!).navigationBarBackButtonHidden(true)) { // Hide the back button) {
+                    AccountSettingItem(title: "用户协议", leftImageName: "user_web_icon", notShowBottomLine: false) {
+                        Spacer()
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.horizontal)
+                .padding(.top, 0)
+
+//                VStack(spacing: 0) {
+//                    NavigationLink(destination: MarqueeSettingView()) {
+//                        AccountSettingItem(title: "手持弹幕", leftImageName: "setting_lock", notShowBottomLine: false) {
+//                            Spacer()
+//                        }
+//                    }
+//                }
+//                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+//                .padding(.horizontal)
+//                .padding(.top, 0)
 
                 Spacer()
             })

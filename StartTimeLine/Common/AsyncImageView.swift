@@ -8,82 +8,124 @@
 import SDWebImageSwiftUI
 import SwiftUI
 
-struct AsyncImageView: View {
-    let url: URL?
-    let cornerRadius: CGFloat
-    let borderColor: Color?
-    let borderWidth: CGFloat?
-    let defaultImage: Image?
-
-    @State private var isLoading: Bool = true // 状态变量来跟踪加载状态
-
-    init(url: URL?, cornerRadius: CGFloat, borderColor: Color? = nil, borderWidth: CGFloat? = nil, defaultImage: Image? = nil) {
-        self.url = url
-        self.cornerRadius = cornerRadius
-        self.borderColor = borderColor
-        self.borderWidth = borderWidth
-        self.defaultImage = defaultImage
-    }
-
-    var body: some View {
-        WebImage(url: url)
-            .resizable()
-            .onSuccess { _, _, _ in
-            }
-            .onFailure { _ in
-            }
-            .scaledToFill()
-            .cornerRadius(cornerRadius)
-            .clipped()
-            .overlay(
-                // 仅在边框颜色和宽度都不为 nil 时添加边框
-                (borderColor != nil && borderWidth != nil) ?
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(borderColor!, lineWidth: borderWidth!) : nil
-            )
-    }
-}
-
-struct AsyncFrameImageView: View {
-    let url: URL?
-    let cornerRadius: CGFloat
-
-    var body: some View {
-        if let url = url {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView() // 显示加载指示器
-                case let .success(image):
-                    image
-                        .resizable() // 使图像可调整大小
-                        .scaledToFill() // 按比例填充
-                        .cornerRadius(cornerRadius) // 设置圆角
-                        .clipped() // 裁剪超出部分
-                case .failure:
-                    Image(systemName: "exclamationmark.triangle") // 显示错误图标
-                        .resizable()
-                        .scaledToFit()
-                        .cornerRadius(cornerRadius)
-                @unknown default:
-                    EmptyView()
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // 撑满父视图
-        } else {
-            EmptyView() // 如果没有 URL，返回空视图
+enum ImageFillMode {
+    case fill   // 填满容器
+    case fit    // 适应容器
+    
+    var contentMode: ContentMode {
+        switch self {
+        case .fill: return .fill
+        case .fit: return .fit
         }
     }
 }
 
-struct AsyncImageView_Previews: PreviewProvider {
-    static var previews: some View {
-        AsyncImageView(
-            url: URL(string: "http://114.116.247.103:2500/static/attachment/star-avatar/weibo/0/d24df98ef4cd6f8fd3a6249d0103e75e.jpg"),
-            cornerRadius: 10
-//            borderColor: nil,
-//            borderWidth: nil
-        )
-        .frame(width: 100, height: 100) // 设置视图的大小
+struct CachedImage: View {
+    let url: String
+    let cornerRadius: CGFloat
+    var fillMode: ImageFillMode = .fill  // 使用自定义枚举
+    var showIndicator: Bool = true
+    var width: CGFloat? = nil
+    var height: CGFloat? = nil
+    var onImageLoaded: ((Image) -> Void)?
+    
+    var body: some View {
+        GeometryReader { geometry in
+            WebImage(url: URL(string: url), options: .highPriority) { phase in
+                switch phase {
+                case .empty:
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(.gray.opacity(0.2))
+                        if showIndicator {
+                            ProgressView()
+                        }
+                    }
+                    
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: fillMode.contentMode)  // 使用枚举值
+                        .onAppear {
+                            onImageLoaded?(image)
+                        }
+                    
+                case .failure:
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(.gray.opacity(0.2))
+                        Image(systemName: "photo")
+                            .foregroundColor(.gray)
+                    }
+                    
+                @unknown default:
+                    EmptyView()
+                }
+            }
+            .frame(
+                width: width ?? geometry.size.width,
+                height: height ?? geometry.size.height
+            )
+            .clipped()
+        }
+        .frame(width: width, height: height)
+        .cornerRadius(cornerRadius)
     }
+}
+
+// 图片加载器
+class ImageLoader: ObservableObject {
+    @Published var isLoading = true
+    
+    func load(url: String) {
+        guard let imageUrl = URL(string: url) else { return }
+        
+        // 检查缓存
+        if SDImageCache.shared.diskImageDataExists(withKey: url) {
+            isLoading = false
+            return
+        }
+        
+        // 预加载
+        SDWebImagePrefetcher.shared.prefetchURLs([imageUrl])
+        
+        // 加载图片
+        SDWebImageManager.shared.loadImage(
+            with: imageUrl,
+            options: .highPriority,
+            progress: nil
+        ) { [weak self] _, _, _, _, _, _ in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+            }
+        }
+    }
+}
+
+
+struct AsyncImageView_Previews: PreviewProvider {
+
+    static var previews: some View {
+        VStack(spacing: 20) {
+            // 填满模式
+            CachedImage(
+                url: "http://114.116.247.103:2500/static/attachment/star-avatar/weibo/0/d24df98ef4cd6f8fd3a6249d0103e75e.jpg",
+                cornerRadius: 8,
+                fillMode: .fill,
+                width: 140,
+                height: 200
+            )
+            
+            // 适应模式
+            CachedImage(
+                url: "http://114.116.247.103:2500/static/attachment/star-avatar/weibo/0/d24df98ef4cd6f8fd3a6249d0103e75e.jpg",
+                cornerRadius: 8,
+                fillMode: .fit,
+                width: 100,
+                height: 200
+            )
+        }
+        .padding()
+    }
+    
 }

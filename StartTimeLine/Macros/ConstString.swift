@@ -8,6 +8,8 @@
 import Foundation
 import UIKit
 
+
+
 let ScreenScale: CGFloat = UIScreen.mainScale
 
 let PortraitScreenWidth: CGFloat = min(UIScreen.mainWidth, UIScreen.mainHeight)
@@ -48,9 +50,14 @@ let RandomImageURL: (CGSize) -> String = {
 }
 
 let kUserInfoToken = "kUserInfoToken"
+// 当前订阅的明星id
+let kUserStartid = "startSid"
 
 // 用户信息key
 let kUserInfoKey = "kUserInfoKey1"
+
+// 当前订阅的key
+let kSubCurrentStartKey = "kSubCurrentStartKey"
 
 struct JP<Base> {
     let base: Base

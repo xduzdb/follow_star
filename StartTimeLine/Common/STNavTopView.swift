@@ -67,7 +67,7 @@ public struct NavTopView<Content>: View where Content: View {
                             Spacer()
                         }
                         .padding(.leading, 15.0)
-                        .frame(maxWidth: self.leadingMaxWidth)
+                        .frame(width: self.leadingMaxWidth)
                         .background(self.isDebug ? Color.red : self.backColor)
                         
                         // 文字的显示
@@ -81,7 +81,7 @@ public struct NavTopView<Content>: View where Content: View {
                             self.trailingView
                         }
                         .padding(.trailing, 15)
-                        .frame(maxWidth: self.trailingMaxWidth)
+                        .frame(width: self.trailingMaxWidth)
                         .background(self.isDebug ? Color.red : self.backColor)
                     }
                     .frame(height: STHelper.NavigationBar.height)

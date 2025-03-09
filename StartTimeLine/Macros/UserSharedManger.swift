@@ -14,11 +14,13 @@ class UserSharedManger {
 
     // 用户的model
     var userInfo: UserInfo?
+    
+    // 用户的token
 
     private init() {}
 
     var isLogin: Bool {
-        let token = getUserToken()
+        let token = self.getUserToken()
         return token?.count ?? 0 > 0
     }
 
@@ -48,7 +50,7 @@ class UserSharedManger {
 
     // 先获取本地的 然后根据启动获取最新的
     func getCurrentUserInfo() -> UserInfo? {
-        if !isLogin {
+        if !self.isLogin {
             if (self.userInfo) != nil {
                 return self.userInfo
             }
@@ -63,7 +65,7 @@ class UserSharedManger {
     // 刷新用户的信息
     func updateUserInfo(resultClouse: ((UserInfo?, _ msg: String?) -> Void)? = nil) {
         // 每次在app启动的时候获取到最新的app信息
-        if !isLogin {
+        if !self.isLogin {
             resultClouse?(nil, nil)
             return
         }
@@ -79,6 +81,16 @@ class UserSharedManger {
                 }
             }
             resultClouse?(nil, model.msg)
+        }
+    }
+
+    // 只是更新用户信息
+    func updatelocalUserData(name: String, avator: String) {
+        self.userInfo?.nickname = name
+        self.userInfo?.avatar = avator
+        let info = self.userInfo?.toJSON()
+        if let info {
+            self.savaUserInfo(data: info)
         }
     }
 

@@ -34,7 +34,9 @@ struct CustomTabBarContainerView<Content: View>: View {
                 .ignoresSafeArea()
             // Tabbar选项容器
             CustomTabBarView(tabs: tabs, style: style, selection: $selection, localSelection: selection)
+                .ignoresSafeArea(.keyboard) // 忽略键盘
         } //: ZSTACK
+        .ignoresSafeArea(.keyboard) // 忽略键盘
         // 通过preferenceKey和tabBarItem方法联动方式动态变化tabbar个数
         .onPreferenceChange(TabBarItemsPreferenceKey.self) { value in
             self.tabs = value

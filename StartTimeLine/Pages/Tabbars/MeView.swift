@@ -12,6 +12,8 @@ import UserNotifications
 struct MeView: View {
     @EnvironmentObject var appEnv: Model
 
+    @State var topScrollerY = CGFloat.zero
+    @State private var showFeedBack = false
     var body: some View {
         ZStack {
             // 底部的渐变
@@ -28,14 +30,16 @@ struct MeView: View {
             })
 
             RoundedRectangle(cornerRadius: 25)
-                .frame(width: .infinity, height: .infinity)
                 .edgesIgnoringSafeArea(.bottom)
                 .offset(y: 100 + STHelper.SafeArea.top)
                 .foregroundColor(Color.mainBackColor())
 
-            ScrollView {
-                scrollDetection
+            VStack(alignment: .leading, spacing: 0) {
+                Spacer()
+                    .frame(height: STHelper.SafeArea.top + 34 + 12)
+
                 profile
+                Spacer()
             }
 
             VStack(spacing: 0, content: {
@@ -64,11 +68,7 @@ struct MeView: View {
             .padding(.top, STHelper.SafeArea.top)
         }
         .onAppear {
-            // 主线程刷新
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                appEnv.userInfo = UserSharedManger.shared.getCurrentUserInfo()
-            }
-            // 获取是否打开推送的状态
+            
         }
     }
 
@@ -82,8 +82,15 @@ struct MeView: View {
                     .clipShape(Circle())
                     .frame(width: 68.0, height: 68.0, alignment: .center)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 34.0)
-                            .stroke(LinearGradient(gradient: Gradient(colors: [.red, .blue]), startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2.0)
+                        Circle()
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [.red, .blue],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2
+                            )
                     )
 
             } placeholder: {
@@ -97,7 +104,6 @@ struct MeView: View {
             }
             .indicator(.activity) // Activity Indicator
             .transition(.fade(duration: 0.5))
-            .padding(EdgeInsets(top: 100 + STHelper.SafeArea.top - 64, leading: 0, bottom: 0, trailing: 0))
 
             Text(appEnv.userInfo?.nickname ?? "")
                 .font(.system(size: 18)).fontWeight(.bold)
@@ -136,9 +142,17 @@ struct MeView: View {
 
             // 底部的设置
             VStack {
-                NavigationLink(destination: STWebView(url: URL(string: "https://www.baidu.com/")!).navigationBarBackButtonHidden(true)) { // Hide the back button) {
-                    MeSettingItem(title: "帮助与反馈", leftImageName: "me_help_icon")
-                }
+                MeSettingItem(title: "帮助与反馈", leftImageName: "me_help_icon")
+                    .background(
+                        WebViewNavigationLink(
+                            urlString: appEnv.feedBackModel?.feedback,
+                            isActive: $showFeedBack
+                        )
+                    )
+                    .onTapGesture {
+                        showFeedBack = true
+                    }
+
                 NavigationLink(destination: ContactUsView()) {
                     MeSettingItem(title: "联系客服", leftImageName: "me_phone_icon")
                 }
@@ -170,6 +184,20 @@ struct MeView: View {
                 }
             }
         })
+    }
+}
+
+struct CurvedBackground: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: rect.height * 0.75))
+        path.addCurve(to: CGPoint(x: rect.width, y: rect.height * 0.75),
+                      control1: CGPoint(x: rect.width * 0.25, y: rect.height),
+                      control2: CGPoint(x: rect.width * 0.75, y: rect.height * 0.5))
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.addLine(to: CGPoint(x: 0, y: rect.height))
+        path.closeSubpath()
+        return path
     }
 }
 

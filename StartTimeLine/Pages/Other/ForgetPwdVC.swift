@@ -24,6 +24,7 @@ class ForgetPwdVC: BaseVC {
         super.viewDidLoad()
         self.initUI()
         self.bindAction()
+        self.navigationController?.navigationBar.isHidden = true
     }
 
     @objc func labelTap(_ gesture: UITapGestureRecognizer) {
@@ -261,7 +262,6 @@ class ForgetPwdVC: BaseVC {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH - 40, height: 44))
         button.setTitle("提交", for: .normal)
         button.setTitleColor(UIColor.white, for: .normal)
-        button.backgroundColor = UIColor.blue
         button.layer.cornerRadius = 5
         button.clipsToBounds = true
         applyGradientToButton(button)

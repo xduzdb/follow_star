@@ -46,7 +46,7 @@ struct StartHourModel: Convertible, Hashable {
 struct StartHistorySubModel: Convertible, Hashable {
     var platform: String?
     var platformName: String?
-    var date: [String]?
+    var data: [Double]?
 
     func kj_modelKey(from property: Property) -> ModelPropertyKey {
         return property.name.kj.underlineCased()
@@ -56,6 +56,11 @@ struct StartHistorySubModel: Convertible, Hashable {
 struct StartHistoryModel: Convertible, Hashable {
     var dates: [String]?
     var items: [StartHistorySubModel]?
+    
+    // 获取所有的data
+    var datasList: [Double] {
+        return items?.first?.data ?? []
+    }
 }
 
 struct StartStatisticsModel: Convertible, Hashable {

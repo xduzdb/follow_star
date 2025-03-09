@@ -9,12 +9,13 @@ import Charts
 import SwiftUI
 
 struct HomeTrendView<Content: View>: View {
-    var data: [Double]?
+    var data: Double?
     var content: () -> Content // 传入的视图
 
     var body: some View {
-        HomeBaseDetailsView(title: "发文趋势") {
+        HomeBaseDetailsView(data: data ,title: "发文趋势") {
             content()
+                .padding(.bottom, 12)
         }
     }
 }

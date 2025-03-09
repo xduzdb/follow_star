@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeStatisticsView<Content: View>: View {
-    var data: [Double]?
+    var data: Double?
     var content: () -> Content
 
     var body: some View {

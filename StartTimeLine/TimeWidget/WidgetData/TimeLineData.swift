@@ -30,6 +30,7 @@ struct StartUser: Convertible {
     let sid: String = ""
     let name: String = ""
     let avatar: String = ""
+    let widgetAvatar: String = ""
     func kj_modelKey(from property: Property) -> ModelPropertyKey {
         return property.name.kj.underlineCased()
     }

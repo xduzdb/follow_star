@@ -13,7 +13,6 @@ import SnapKit
 import SVProgressHUD
 import SwiftUI
 import UIKit
-import UMCommon
 
 class LoginVC: BaseVC {
     var loginCallback: ((Bool) -> Void)?
@@ -67,7 +66,7 @@ class LoginVC: BaseVC {
 
         // 跳转到设置密码的页面
         forgetPassword.rx.tap.subscribe(onNext: { [weak self] in
-            self?.pushForgetPageBlock?(true)
+            self?.navigationController?.pushViewController(ForgetPwdVC(), animated: true)
         }).disposed(by: disposeBag)
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
@@ -91,13 +90,13 @@ class LoginVC: BaseVC {
                 make.centerX.equalTo(self.pwdButton.centerX)
             }
         }
-        
+
         bottomLineView.snp.remakeConstraints { make in
             if type == 1 {
                 make.centerX.equalTo(self.verButton)
                 make.top.equalTo(self.mainBackView).offset(35)
                 make.size.equalTo(CGSize(width: 24, height: 5))
-                
+
             } else {
                 make.centerX.equalTo(self.pwdButton)
                 make.top.equalTo(self.mainBackView).offset(35)
@@ -119,16 +118,12 @@ class LoginVC: BaseVC {
 
     // 登录操作
     func login() {
-        if !isAgress {
-            SVProgressHUD.showInfo(withStatus: "请同意下底部协议")
-            return
-        }
         dismissKeyboard()
-        SVProgressHUD.show(withStatus: "登录中")
         if (accountTextField.text?.count ?? 0) == 0 {
             SVProgressHUD.showInfo(withStatus: "请输入手机号")
             return
         }
+
         if loginType == 1 {
             loginByCode()
         } else {
@@ -142,6 +137,17 @@ class LoginVC: BaseVC {
             SVProgressHUD.showInfo(withStatus: "请输入验证码")
             return
         }
+
+        if !isAgress {
+            SVProgressHUD.showInfo(withStatus: "请同意下底部协议")
+            showIsNotAgree { agree in
+                if agree ?? false {
+                    self.loginByCode()
+                }
+            }
+            return
+        }
+        SVProgressHUD.show(withStatus: "登录中")
         // 截取self.areaCodeLabel.text 从第二个字符开始
         let areaCode = String(areaCodeLabel.text?.dropFirst() ?? "")
 
@@ -149,7 +155,17 @@ class LoginVC: BaseVC {
         let params = ["iac": areaCode, "phone": accountTextField.text ?? "", "code": passwordTextField.text ?? ""] as [String: Any]
         NetWorkManager.ydNetWorkRequest(.loginPhoneCode(params), completion: { [weak self] requestObj in
             if requestObj.status == .success {
-                self?.loginSuccess(requestObj: requestObj)
+                if let data = requestObj.data,
+                   let user = data["user"] as? [String: Any],
+                   let needSetPawd = user["set_password"] as? Bool
+                {
+                    if !needSetPawd {
+                        SVProgressHUD.dismiss()
+                        self?.navigateToSetPwdView(requestObj: requestObj)
+                    } else {
+                        self?.loginSuccess(requestObj: requestObj)
+                    }
+                }
             }
         })
     }
@@ -160,6 +176,17 @@ class LoginVC: BaseVC {
             SVProgressHUD.showInfo(withStatus: "请输入密码")
             return
         }
+
+        if !isAgress {
+            SVProgressHUD.showInfo(withStatus: "请同意下底部协议")
+            showIsNotAgree { agree in
+                if agree ?? false {
+                    self.loginByPwd()
+                }
+            }
+            return
+        }
+        SVProgressHUD.show(withStatus: "登录中")
 
         // 截取self.areaCodeLabel.text 从第二个字符开始
         let areaCode = String(areaCodeLabel.text?.dropFirst() ?? "")
@@ -257,6 +284,19 @@ class LoginVC: BaseVC {
         }
     }
 
+    // 跳转到设置密码的页面
+    private func navigateToSetPwdView(requestObj: NetResultModel) {
+        var setPasswordView = SetPasswordView() // 创建目标视图控制器
+        setPasswordView.onPasswordSet = { success in
+            if success {
+                self.loginSuccess(requestObj: requestObj)
+            }
+        }
+
+        let hostingController = UIHostingController(rootView: setPasswordView)
+        navigationController?.pushViewController(hostingController, animated: true)
+    }
+
     // 初始化
     func initUI() {
         view.addSubview(backImageView)
@@ -306,7 +346,7 @@ class LoginVC: BaseVC {
             make.top.equalTo(self.verButton)
             make.centerY.equalTo(self.verButton)
         }
-        
+
         bottomLineView.snp.makeConstraints { make in
             make.centerX.equalTo(self.verButton)
             make.top.equalTo(self.mainBackView).offset(35)
@@ -405,19 +445,6 @@ class LoginVC: BaseVC {
             make.bottom.equalTo(self.wechatImageView.snp.top).offset(-12)
         }
 
-        let text = "请查看我们的《隐私政策》和《使用条款》"
-        let attributedString = NSMutableAttributedString(string: text, attributes: [.foregroundColor: UIColor.text999Color(),
-                                                                                    .font: UIFont.systemFont(ofSize: 13)])
-
-        // 设置“隐私政策”和“使用条款”的范围
-        let privacyPolicyRange = (text as NSString).range(of: "《隐私政策》")
-        let termsRange = (text as NSString).range(of: "《使用条款》")
-
-        // 设置属性
-        attributedString.addAttribute(.foregroundColor, value: UIColor.mainColor(), range: privacyPolicyRange)
-        attributedString.addAttribute(.foregroundColor, value: UIColor.mainColor(), range: termsRange)
-        clickableLabel.attributedText = attributedString
-
         view.addSubview(toggleButton)
         view.addSubview(clickableLabel)
 
@@ -433,28 +460,38 @@ class LoginVC: BaseVC {
             make.size.equalTo(CGSizeMake(16, 16))
             make.centerX.equalTo(self.view).offset(-270 / 2 - 10)
         }
+
+        setupClickableLabel()
     }
 
-    @objc private func labelTapped(_ gesture: UITapGestureRecognizer) {
-        let text = clickableLabel.attributedText?.string ?? ""
+    private func setupClickableLabel() {
+        let text = "我已阅读并同意《用户协议》和《隐私政策》"
+        let attributedString = NSMutableAttributedString(
+            string: text,
+            attributes: [
+                .foregroundColor: UIColor.text999Color(),
+                .font: UIFont.systemFont(ofSize: 13),
+            ]
+        )
+
+        // 设置可点击的范围
+        let userAgreementRange = (text as NSString).range(of: "《用户协议》")
         let privacyPolicyRange = (text as NSString).range(of: "《隐私政策》")
-        let termsRange = (text as NSString).range(of: "《使用条款》")
 
-        let location = gesture.location(in: clickableLabel)
-        let index = clickableLabel.layoutManager.characterIndex(for: location, in: clickableLabel.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
+        // 添加链接属性
+        attributedString.addAttribute(.link, value: "useragreement://", range: userAgreementRange)
+        attributedString.addAttribute(.link, value: "privacypolicy://", range: privacyPolicyRange)
 
-        // 检查点击的字符索引是否在“隐私政策”或“使用条款”的范围内
-        if NSLocationInRange(index, privacyPolicyRange) {
-            // 点击了“隐私政策”
-            if let url = URL(string: "https://www.example.com/privacy") {
-                UIApplication.shared.open(url)
-            }
-        } else if NSLocationInRange(index, termsRange) {
-            // 点击了“使用条款”
-            if let url = URL(string: "https://www.example.com/terms") {
-                UIApplication.shared.open(url)
-            }
-        }
+        // 设置链接的颜色
+        attributedString.addAttribute(.foregroundColor, value: UIColor.mainColor(), range: userAgreementRange)
+        attributedString.addAttribute(.foregroundColor, value: UIColor.mainColor(), range: privacyPolicyRange)
+
+        // 这里设置链接的颜色
+        clickableLabel.linkTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.mainColor()] // 设置链接的颜色
+
+        clickableLabel.attributedText = attributedString
+        clickableLabel.isUserInteractionEnabled = true
+        clickableLabel.delegate = self
     }
 
     @objc private func toggleButtonTapped() {
@@ -586,6 +623,7 @@ class LoginVC: BaseVC {
         let textField = UITextField()
         // 设置最多输入4个字符
         textField.placeholder = "请输入密码"
+        textField.isSecureTextEntry = true
         textField.font = UIFont.systemFont(ofSize: 14)
         textField.textColor = UIColor.text333Color()
         return textField
@@ -658,8 +696,8 @@ class LoginVC: BaseVC {
     lazy var wechatImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "login_wechat"))
         imageView.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(loginWechat))
-        imageView.addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(loginWechat))
+//        imageView.addGestureRecognizer(tapGesture)
         return imageView
     }()
 
@@ -693,15 +731,71 @@ class LoginVC: BaseVC {
     }()
 }
 
-// 登录的操作
-extension LoginVC {
-    @objc func loginWechat() {
-        UMSocialManager.default().getUserInfo(with: UMSocialPlatformType.wechatSession, currentViewController: self) { _, error in
+extension LoginVC: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        switch URL.scheme {
+        case "useragreement":
+            navigateToWebView(with: userAgreeUrl()) // 替换为实际链
 
-            if let error = error {
-                print("WeChat login error: \(error.localizedDescription)")
-                return
+        case "privacypolicy":
+            navigateToWebView(with: privateUrl()) // 替换为实际链
+        default:
+            break
+        }
+        return false
+    }
+
+    private func navigateToWebView(with url: String) {
+        guard let url = URL(string: url) else { return }
+        let webView = STWebView(url: url)
+        let hostingController = UIHostingController(rootView: webView)
+        // 检查 navigationController 是否为 nil
+        if let navigationController = navigationController {
+            navigationController.pushViewController(hostingController, animated: true)
+        } else {
+            // 如果 navigationController 为 nil，可以选择以模态方式呈现
+            let modalNavigationController = UINavigationController(rootViewController: hostingController)
+            modalNavigationController.navigationBar.isHidden = true
+            present(modalNavigationController, animated: true) {
+                modalNavigationController.setNavigationBarHidden(true, animated: false)
             }
         }
+    }
+}
+
+extension LoginVC {
+    func showIsNotAgree(completion: @escaping (Bool?) -> Void) {
+        let customPopupView = FWPopupView(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH - 90, height: 130))
+
+        let centerItemView = LoginAgreeView(itemHeight: 130, onAgree: {
+            self.updateButtonAppearance(isSelected: false)
+            customPopupView.hide()
+            completion(true)
+        })
+
+        let hostingController = UIHostingController(rootView: centerItemView)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        customPopupView.addSubview(hostingController.view)
+
+        hostingController.view.snp.makeConstraints { make in
+            make.size.equalTo(customPopupView)
+            make.top.equalTo(customPopupView.top)
+        }
+
+        hostingController.view.layer.cornerRadius = 15
+        hostingController.view.backgroundColor = .clear
+        customPopupView.layer.cornerRadius = 15
+
+        let vProperty = FWPopupViewProperty()
+        vProperty.popupCustomAlignment = .center
+        vProperty.popupAnimationType = .scale3D
+        vProperty.maskViewColor = UIColor(white: 0, alpha: 0.5)
+        vProperty.touchWildToHide = "1"
+        vProperty.popupViewEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        vProperty.backgroundColor = .clear
+        vProperty.animationDuration = 0.25
+        customPopupView.vProperty = vProperty
+
+        customPopupView.show()
     }
 }

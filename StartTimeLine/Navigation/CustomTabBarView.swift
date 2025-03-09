@@ -46,8 +46,8 @@ struct CustomTabBarView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             Spacer()
-            CustomTabBarView(tabs: tabs, style: .normal, selection: .constant(tabs.first!), localSelection: tabs.first!)
-                .frame(maxWidth: 88 * 3)
+            CustomTabBarView(tabs: tabs, style: .line, selection: .constant(.history), localSelection: .history)
+                .frame(maxWidth: 88 * 3 + 4)
         }
     }
 }
@@ -69,7 +69,7 @@ extension CustomTabBarView {
         .foregroundColor(selection == tab ? tab.color : Color.gray)
         .padding(.vertical, 8)
         .padding(.horizontal, 8)
-        .frame(maxWidth: 88)
+        .frame(maxWidth: 100)
         .background(selection == tab ? tab.color.opacity(0.2) : Color.clear)
         .cornerRadius(22)
     }
@@ -98,7 +98,7 @@ extension CustomTabBarView {
 // 样式2
 extension CustomTabBarView {
     private func tabView2(tab: TabBarItem) -> some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 6) {
             String.BundleImageName(selection == tab ? tab.iconSelectName : tab.iconName)
                 .frame(width: 28, height: 28)
 
@@ -111,7 +111,8 @@ extension CustomTabBarView {
         } //: VSTACK
         .foregroundColor(localSelection == tab ? tab.color : Color.gray)
         .padding(.vertical, 8)
-        .frame(maxWidth: 88)
+        .frame(width: tab == .history ? 90 : 88)
+        .padding(.horizontal, 0)
 
         .background(
             ZStack {
@@ -135,8 +136,8 @@ extension CustomTabBarView {
         } //: HSTACK
         .padding(6)
         .background(Color.black.ignoresSafeArea(edges: .bottom))
-        .cornerRadius(56/2)
-        .frame(maxWidth: 88 * 3)
+        .cornerRadius(56/2.0)
+        .frame(maxWidth: 88 * 3 + 12.0)
         .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
     }

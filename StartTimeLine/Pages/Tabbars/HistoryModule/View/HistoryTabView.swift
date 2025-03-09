@@ -9,8 +9,8 @@ import Foundation
 import UIKit
 
 public class HistoryTabView: UIView {
-    // 背景图
-    var bgView: UIView!
+    // 背景图 - 采用和首页的都是一样的
+//    var bgView: UIImageView!
     // 阳历
     var dateSolarLb: UILabel!
     // 阴历
@@ -18,33 +18,60 @@ public class HistoryTabView: UIView {
     // 日期
     var calendarView: UIView!
     // 头像
-    var avatarBtn: UIButton!
+//    var avatarBtn: UIImageView!
+    
     // 昵称
     var nameLb: UILabel!
+    var editBgBtn: UIButton!
     
-    public override init(frame: CGRect) {
+    // MARK: - - lazy init
+
+    // 背景图 - 采用和首页的都是一样的
+    lazy var bgView: UIImageView = {
+        let bgView = UIImageView()
+        bgView.contentMode = .scaleAspectFill
+        return bgView
+    }()
+    
+    // 顶部的信息
+    lazy var iconView: UIView = {
+        let iconView = UIView()
+        return iconView
+    }()
+    
+    lazy var avatarBtn: UIImageView = {
+        let avatarBtn = UIImageView()
+        avatarBtn.contentMode = .scaleAspectFill
+        return avatarBtn
+    }()
+    
+    override public init(frame: CGRect) {
         super.init(frame: frame)
-        setBgView()
         // 顶部状态栏
+        initUI()
         setTopBarView()
         setCalendarView()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setBgView() {
-        bgView = UIImageView(image: UIImage(named: "hot")) // change 网络加载
-        bgView.frame = CGRect(x: 0, y: 0, width: ST_DP(375), height: ST_DP(815))
-        bgView.backgroundColor = .clear
+    // 初始化
+    func initUI() {
+        // 顶部的内容
         addSubview(bgView)
+        bgView.snp.makeConstraints { make in
+            make.left.right.top.bottom.equalTo(self)
+        }
     }
-    
+
+    // 顶部导航栏的相关设置
     func setTopBarView() {
         // 整个顶部导航栏
-        let topBarView = UIView(frame: CGRect(x: 0, y: ST_DP(44), width: bounds.width, height: ST_DP(44)))
-        topBarView.backgroundColor = .clear
+        //  TODO: 改为自动布局
+        let topBarView = UIView(frame: CGRect(x: 0, y: STHelper.SafeArea.top, width: STHelper.screenWidth, height: 44.0))
         addSubview(topBarView)
         
         // 头像部分
@@ -54,8 +81,7 @@ public class HistoryTabView: UIView {
         iconView.backgroundColor = UIColor(white: 1, alpha: 0.3)
         
         // 头像
-        avatarBtn = UIButton(frame: CGRect(x: ST_DP(2), y: ST_DP(2), width: ST_DP(32), height: ST_DP(32)))
-        avatarBtn.backgroundColor = .blue // change .clear
+        avatarBtn = UIImageView(frame: CGRect(x: ST_DP(2), y: ST_DP(2), width: ST_DP(32), height: ST_DP(32)))
         avatarBtn.layer.cornerRadius = avatarBtn.width/2
         avatarBtn.layer.masksToBounds = true
         
@@ -92,7 +118,7 @@ public class HistoryTabView: UIView {
         topBarView.addSubview(launchBtn)
         
         // 颜料桶部分
-        let editBgBtn = UIButton(frame: CGRect(x: ST_DP(287), y: ST_DP(12), width: ST_DP(20), height: ST_DP(20)))
+        editBgBtn = UIButton(frame: CGRect(x: ST_DP(287), y: ST_DP(12), width: ST_DP(20), height: ST_DP(20)))
         editBgBtn.setImage(UIImage(named: "edit_bg_colors"), for: .normal)
 
         let editBgView = UIView(frame: .zero)
@@ -100,7 +126,7 @@ public class HistoryTabView: UIView {
         editBgView.center = CGPoint(x: editBgBtn.center.x, y: editBgBtn.center.y)
         editBgView.layer.cornerRadius = shareBgView.height/2
         editBgView.layer.masksToBounds = true
-        editBgView.backgroundColor = UIColor(white: 0, alpha: 0.3)
+        editBgView.backgroundColor = UIColor(white: 0, alpha: 0.15)
         
         topBarView.addSubview(editBgView)
         topBarView.addSubview(editBgBtn)
@@ -114,7 +140,7 @@ public class HistoryTabView: UIView {
         helpBgView.center = CGPoint(x: helpBtn.center.x, y: helpBtn.center.y)
         helpBgView.layer.cornerRadius = shareBgView.height/2
         helpBgView.layer.masksToBounds = true
-        helpBgView.backgroundColor = UIColor(white: 0, alpha: 0.3)
+        helpBgView.backgroundColor = UIColor(white: 0, alpha: 0.15)
         
         topBarView.addSubview(helpBgView)
         topBarView.addSubview(helpBtn)
@@ -145,17 +171,17 @@ public class HistoryTabView: UIView {
         calendarView.addSubview(dateLunarLb)
         
         NSLayoutConstraint.activate([
-            calendarView.widthAnchor.constraint(equalToConstant: self.width),
+            calendarView.widthAnchor.constraint(equalToConstant: width),
             calendarView.heightAnchor.constraint(equalToConstant: ST_DP(58)),
-            calendarView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            calendarView.topAnchor.constraint(equalTo: self.topAnchor, constant: ST_DP(107)),
+            calendarView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            calendarView.topAnchor.constraint(equalTo: topAnchor, constant: ST_DP(107)),
             
             dateSolarLb.heightAnchor.constraint(equalToConstant: ST_DP(34)),
-            dateSolarLb.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            dateSolarLb.centerXAnchor.constraint(equalTo: centerXAnchor),
             dateSolarLb.topAnchor.constraint(equalTo: calendarView.topAnchor),
             
             dateLunarLb.heightAnchor.constraint(equalToConstant: ST_DP(20)),
-            dateLunarLb.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            dateLunarLb.centerXAnchor.constraint(equalTo: centerXAnchor),
             dateLunarLb.topAnchor.constraint(equalTo: dateSolarLb.bottomAnchor, constant: ST_DP(4))
         ])
     }

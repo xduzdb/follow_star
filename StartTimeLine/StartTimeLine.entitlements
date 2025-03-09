@@ -5,10 +5,13 @@
 	<key>aps-environment</key>
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
-	<array/>
+	<array>
+		<string>applinks:49032217697a2e2090f03b884de16581.share2dlink.com</string>
+	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.time.StartTime</string>
+		<string>group.cc.pp.starschasing.HomeWidget</string>
 	</array>
 </dict>
 </plist>

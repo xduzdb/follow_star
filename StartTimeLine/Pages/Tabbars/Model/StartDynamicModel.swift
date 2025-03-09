@@ -37,6 +37,20 @@ struct StartDynamicSourceModel: Convertible, Hashable {
     }
 }
 
+// 社交动态
+struct StartSocialAccountModel: Convertible, Hashable {
+    var platformNickname: Int?
+    var platform: Int?
+    var platformUserId: String?
+
+    func kj_modelKey(from property: Property) -> ModelPropertyKey {
+        switch property.name {
+        default: return property.name.kj.underlineCased()
+        }
+    }
+}
+
+
 // retweet 的信息、
 struct StartDynamicRetweetModel: Convertible, Hashable {
     var postType: String?
@@ -59,7 +73,8 @@ struct StartDynamicModel: Convertible, Hashable {
     var sendAt: String?
     var star: StartUserModel?
     var retweet: StartDynamicRetweetModel?
-
+    var socialAccount: StartSocialAccountModel?
+    
     var bottomInfo: String {
         var platformStr: String?
         if platform == "douyin" {
@@ -69,6 +84,7 @@ struct StartDynamicModel: Convertible, Hashable {
         }
         return "\(Date().getFormatHomeBottomTime(dateString: sendAt ?? ""))·\(platformStr ?? "")"
     }
+    
 
     func kj_modelKey(from property: Property) -> ModelPropertyKey {
         return property.name.kj.underlineCased()

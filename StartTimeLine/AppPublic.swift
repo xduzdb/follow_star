@@ -11,25 +11,20 @@ import UIKit
 let isRelease = false
 
 // 是不是打开其他方式方式  目前没有对应的key 需要进行隐藏
-let isShowOtherLogin = true
-
-// 一些Config
+let isShowOtherLogin = false
 
 // 极光推送
 let jPushAppKey = "dc7457a784d454be057e519c"
 let jPushChannel = "AppStore"
 let isProduction = false
 
-// 友盟一些key QQ和新浪的暂时没有
-let UmengAppkey = "6711d4f6667bfe33f3c3f42c"
 
+// 微信的
 let wechatAppkey = "wx34908d77740cafda"
 let wechatAppSerect = "cd5e6eebbfa00e9f34714dc22bd2c21f"
 
-let qqAppkey = "6711d4f6667bfe33f3c3f42c"
-
-let sinaAppkey = "6711d4f6667bfe33f3c3f42c"
-let sinaAppSerect = "6711d4f6667bfe33f3c3f42c"
+let sinaAppkey = "xxxxxxxxxx"
+let sinaAppSerect = "xxxxxxxxxx"
 
 // MARK: - GCD
 

@@ -22,7 +22,7 @@ struct StartCoverModel: Convertible, Hashable {
     var id: Int?
     var type: Int?
     var status: Int?
-    var isSelect: String?
+    var isSelect: Int?
     var url: String?
     var thumb: String?
 
@@ -40,6 +40,11 @@ struct StartCustomCoverInfo: Convertible, Hashable {
 
     var combinedModels: [StartCoverModel] {
         let combined = (globals ?? []) + (stars ?? [])
+        return combined
+    }
+    
+    var allCombinedModels: [StartCoverModel] {
+        let combined = (globals ?? []) + (stars ?? []) + (owns ?? [])
         return combined
     }
     

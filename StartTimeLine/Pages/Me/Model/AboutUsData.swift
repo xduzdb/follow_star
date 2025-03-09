@@ -6,17 +6,17 @@
 //
 
 import Foundation
-//import ObjectMapper
+import ObjectMapper
 
 class AboutUsData: Mappable {
-    var protocol_url: String?
+    var protocolUrl: String?
     var intro: String?
-    var policy_url: String?
+    var policyUrl: String?
 
     func mapping(map: Map) {
-        protocol_url <- map["protocol_url"]
+        protocolUrl <- map["protocol_url"]
         intro <- map["intro"]
-        policy_url <- map["policy_url"]
+        policyUrl <- map["policy_url"]
     }
     
     required init?(map: Map) {
