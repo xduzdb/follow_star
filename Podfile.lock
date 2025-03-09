@@ -77,6 +77,7 @@ DEPENDENCIES:
   - SDWebImageSwiftUI
   - SnapKit (~> 5.7.0)
   - SVProgressHUD
+  - SwiftyJSON
   - SwiftyJSON (~> 5.0.0)
   - UMCommon
   - UMDevice
@@ -140,6 +141,6 @@ SPEC CHECKSUMS:
   UMDevice: dcdf7ec167387837559d149fbc7d793d984faf82
   UMShare: edb49e162824e2ddd61ef53a7c6e92d64f3c13b5
 
-PODFILE CHECKSUM: c8b2dee3c0d52d34571e006881c3255c627dcc74
+PODFILE CHECKSUM: 0850eeabee524a184f642347b67a968d229b7e98
 
 COCOAPODS: 1.15.2

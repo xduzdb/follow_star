@@ -1,12 +1,17 @@
 # Uncomment the next line to define a global platform for your project
 
+target 'HomeWidgetExtension' do
+  use_frameworks!
+  pod 'SwiftyJSON'
+  pod 'KakaJSON'
+  pod 'SDWebImageSwiftUI'
+#  pod 'Moya', '~> 15.0.0'
+#  pod 'ObjectMapper', '~> 4.2.0'
+end
+
 target 'StartTimeLine' do
   
   use_frameworks!
-  pod 'SwiftyJSON'
-  pod 'ObjectMapper', '~> 4.2.0'
-  pod 'KakaJSON'
-  pod 'SDWebImageSwiftUI'
   pod 'JPush'
   pod 'JCore'
   pod 'SnapKit', '~> 5.7.0'

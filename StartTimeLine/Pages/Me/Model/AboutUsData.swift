@@ -6,7 +6,7 @@
 //
 
 import Foundation
-//import ObjectMapper
+import ObjectMapper
 
 class AboutUsData: Mappable {
     var protocol_url: String?
