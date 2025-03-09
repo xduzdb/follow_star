@@ -1,0 +1,18 @@
+//
+//  STGes.swift
+//  StartTimeLine
+//
+//  Created by lushitong on 2024/8/25.
+//
+
+import UIKit
+
+extension UINavigationController: UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return viewControllers.count > 1
+    }
+}

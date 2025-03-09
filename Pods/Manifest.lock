@@ -1,0 +1,145 @@
+PODS:
+  - AAInfographics (9.0.0)
+  - Alamofire (5.10.1)
+  - FWPopupView (4.2.2):
+    - SnapKit
+  - JCore (4.8.0)
+  - JPush (5.4.0):
+    - JCore (>= 2.0.0)
+  - KakaJSON (1.1.2)
+  - LookinServer (1.2.8):
+    - LookinServer/Core (= 1.2.8)
+  - LookinServer/Core (1.2.8)
+  - LunarSwift (1.0.10)
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
+  - ObjectMapper (4.2.0)
+  - RxCocoa (6.7.1):
+    - RxRelay (= 6.7.1)
+    - RxSwift (= 6.7.1)
+  - RxRelay (6.7.1):
+    - RxSwift (= 6.7.1)
+  - RxSwift (6.7.1)
+  - SDWebImage (5.19.7):
+    - SDWebImage/Core (= 5.19.7)
+  - SDWebImage/Core (5.19.7)
+  - SDWebImageSwiftUI (3.1.1):
+    - SDWebImage (~> 5.10)
+  - SnapKit (5.7.1)
+  - SVProgressHUD (2.3.1):
+    - SVProgressHUD/Core (= 2.3.1)
+  - SVProgressHUD/Core (2.3.1)
+  - SwiftyJSON (5.0.2)
+  - UMCommon (7.4.7):
+    - UMDevice
+  - UMDevice (3.4.0)
+  - UMShare/Core (6.10.12):
+    - UMCommon
+  - UMShare/Social/QQ (6.10.12):
+    - UMCommon
+    - UMShare/Core
+    - UMShare/Social/ReducedQQ
+  - UMShare/Social/ReducedQQ (6.10.12):
+    - UMCommon
+    - UMShare/Core
+  - UMShare/Social/ReducedSina (6.10.12):
+    - UMCommon
+    - UMShare/Core
+  - UMShare/Social/ReducedWeChat (6.10.12):
+    - UMCommon
+    - UMShare/Core
+  - UMShare/Social/Sina (6.10.12):
+    - UMCommon
+    - UMShare/Core
+    - UMShare/Social/ReducedSina
+  - UMShare/Social/WeChat (6.10.12):
+    - UMCommon
+    - UMShare/Core
+    - UMShare/Social/ReducedWeChat
+  - UMShare/UI (6.10.12):
+    - UMCommon
+    - UMShare/Core
+
+DEPENDENCIES:
+  - AAInfographics (from `https://github.com/AAChartModel/AAChartKit-Swift.git`)
+  - FWPopupView
+  - JCore
+  - JPush
+  - KakaJSON
+  - LookinServer
+  - LunarSwift
+  - Moya (~> 15.0.0)
+  - ObjectMapper (~> 4.2.0)
+  - RxCocoa (= 6.7.1)
+  - RxSwift (= 6.7.1)
+  - SDWebImageSwiftUI
+  - SnapKit (~> 5.7.0)
+  - SVProgressHUD
+  - SwiftyJSON (~> 5.0.0)
+  - UMCommon
+  - UMDevice
+  - UMShare/Social/QQ
+  - UMShare/Social/Sina
+  - UMShare/Social/WeChat
+  - UMShare/UI
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - FWPopupView
+    - JCore
+    - JPush
+    - KakaJSON
+    - LookinServer
+    - LunarSwift
+    - Moya
+    - ObjectMapper
+    - RxCocoa
+    - RxRelay
+    - RxSwift
+    - SDWebImage
+    - SDWebImageSwiftUI
+    - SnapKit
+    - SVProgressHUD
+    - SwiftyJSON
+    - UMCommon
+    - UMDevice
+    - UMShare
+
+EXTERNAL SOURCES:
+  AAInfographics:
+    :git: https://github.com/AAChartModel/AAChartKit-Swift.git
+
+CHECKOUT OPTIONS:
+  AAInfographics:
+    :commit: 45945dec124efd523f457f83d5369e16bf62c2cd
+    :git: https://github.com/AAChartModel/AAChartKit-Swift.git
+
+SPEC CHECKSUMS:
+  AAInfographics: 31fd2891509a97e34693aeaf681daa7b2b4d8c0f
+  Alamofire: 840d2a1ad82355b536ec6ba5f97e5bfa54600ca3
+  FWPopupView: b96d7d46d4afaad8e99d2739f9118a3c43c63a7b
+  JCore: 72aeac69a0ba49b9ef6e753cdd2d0f7f18deb15f
+  JPush: 9ebff4e71616d3bd886d358e8e0039d5a00d0d92
+  KakaJSON: cc5ff50a8c1cfbb09413db8496cb709a209e6137
+  LookinServer: 1b2b61c6402ae29fa22182d48f5cd067b4e99e80
+  LunarSwift: 569383e818172634e3752066cf6d8dca15011608
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
+  RxCocoa: f5609cb4637587a7faa99c5d5787e3ad582b75a4
+  RxRelay: 4151ba01152436b08271e08410135e099880eae5
+  RxSwift: b9a93a26031785159e11abd40d1a55bcb8057e52
+  SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
+  SDWebImageSwiftUI: dcff3d05fd0579ff280221ae8856c34ac3b67f25
+  SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
+  SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
+  UMCommon: 8b4cd0423297c39bca6eea1ec896558b40e5bcf7
+  UMDevice: dcdf7ec167387837559d149fbc7d793d984faf82
+  UMShare: edb49e162824e2ddd61ef53a7c6e92d64f3c13b5
+
+PODFILE CHECKSUM: c8b2dee3c0d52d34571e006881c3255c627dcc74
+
+COCOAPODS: 1.15.2
