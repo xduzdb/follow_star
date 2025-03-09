@@ -159,12 +159,7 @@ class LoginVC: BaseVC {
                    let user = data["user"] as? [String: Any],
                    let needSetPawd = user["set_password"] as? Bool
                 {
-                    if !needSetPawd {
-                        SVProgressHUD.dismiss()
-                        self?.navigateToSetPwdView(requestObj: requestObj)
-                    } else {
-                        self?.loginSuccess(requestObj: requestObj)
-                    }
+                    self?.loginSuccess(requestObj: requestObj)
                 }
             }
         })
